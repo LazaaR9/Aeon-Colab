@@ -15,7 +15,7 @@ from urllib.parse import urlparse
 from asyncio.subprocess import PIPE
 from concurrent.futures import ThreadPoolExecutor
 
-from psutil import disk_usage
+from psutil import virtual_memory, cpu_percent, disk_usage
 from aiohttp import ClientSession as aioClientSession
 from aiofiles import open as aiopen
 from aiofiles.os import path as aiopath
@@ -34,6 +34,7 @@ from bot import (
     bot_start_time,
     download_dict_lock,
 )
+from bot import botStartTime
 from bot.helper.aeon_utils.tinyfy import tinyfy
 from bot.helper.ext_utils.db_handler import DbManager
 from bot.helper.ext_utils.shorteners import short_url
