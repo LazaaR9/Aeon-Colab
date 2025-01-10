@@ -109,18 +109,18 @@ STATUS_LIMIT = 4
 
 
 class MirrorStatus:
-    STATUS_UPLOADING = "Uploading"
-    STATUS_DOWNLOADING = "Downloading"
-    STATUS_CLONING = "Cloning"
-    STATUS_QUEUEDL = "DL queued"
-    STATUS_QUEUEUP = "UL queued"
-    STATUS_PAUSED = "Paused"
-    STATUS_ARCHIVING = "Archiving"
-    STATUS_EXTRACTING = "Extracting"
-    STATUS_SPLITTING = "Splitting"
-    STATUS_CHECKING = "CheckUp"
-    STATUS_SEEDING = "Seeding"
-    STATUS_PROCESSING = "Processing"
+    STATUS_UPLOADING   = "📤 Uᴘʟᴏᴀᴅɪɴɢ"
+    STATUS_DOWNLOADING = "📥 Dᴏᴡɴʟᴏᴀᴅɪɴɢ"
+    STATUS_CLONING     = "♻️ Cʟᴏɴᴇ"
+    STATUS_QUEUEDL     = "💤 QᴜᴇᴜᴇDL"
+    STATUS_QUEUEUP     = "💤 QᴜᴇᴜᴇUᴘ"
+    STATUS_PAUSED      = "⛔️ Pᴀᴜsᴇ"
+    STATUS_ARCHIVING   = "🔐 Aʀᴄʜɪᴠᴇ"
+    STATUS_EXTRACTING  = "📂 Exᴛʀᴀᴄᴛ"
+    STATUS_SPLITTING   = "✂️ Sᴘʟɪᴛ"
+    STATUS_CHECKING    = "📝 CʜᴇᴄᴋUᴘ"
+    STATUS_SEEDING     = "🌧 Sᴇᴇᴅ"
+    STATUS_PROCESSING  = "⚙️ Pʀᴏᴄᴇssɪɴɢ"
 
 
 class SetInterval:
@@ -234,8 +234,8 @@ def progress_bar(pct):
         pct = float(pct.strip("%"))
     p = min(max(pct, 0), 100)
     c_full = int((p + 5) // 10)
-    p_str = "●" * c_full
-    p_str += "○" * (10 - c_full)
+    p_str = "█" * c_full
+    p_str += "▒" * (10 - c_full)
     return p_str
 
 
@@ -248,7 +248,7 @@ def source(self):
 
 
 def get_readable_message():
-    msg = '<b>Pᴏᴡᴇʀᴇᴅ Bʏ Aᴇᴏɴ</b>\n\n'
+    msg = "<b>MLTB Lite by Aeon</b>\n\n"
     button = None
     tasks = len(download_dict)
     current_time = get_readable_time(time() - bot_start_time)
@@ -289,15 +289,39 @@ def get_readable_message():
         msg += f"\n<blockquote>/stop_{download.gid()[:8]}</blockquote>\n\n"
     if len(msg) == 0:
         return None, None
+    dl_speed = 0
+    up_speed = 0
+    for download in download_dict.values():
+            tstatus = download.status()
+            if tstatus == MirrorStatus.STATUS_DOWNLOADING:
+                spd = download.speed()
+                if 'K' in spd:
+                    dl_speed += float(spd.split('K')[0]) * 1024
+                elif 'M' in spd:
+                    dl_speed += float(spd.split('M')[0]) * 1048576
+            elif tstatus == MirrorStatus.STATUS_UPLOADING:
+                spd = download.speed()
+                if 'K' in spd:
+                    up_speed += float(spd.split('K')[0]) * 1024
+                elif 'M' in spd:
+                    up_speed += float(spd.split('M')[0]) * 1048576
+            elif tstatus == MirrorStatus.STATUS_SEEDING:
+                spd = download.upload_speed()
+                if 'K' in spd:
+                    up_speed += float(spd.split('K')[0]) * 1024
+                elif 'M' in spd:
+                    up_speed += float(spd.split('M')[0]) * 1048576
     if tasks > STATUS_LIMIT:
         buttons = ButtonMaker()
         buttons.callback("Prev", "status pre")
         buttons.callback(f"{PAGE_NO}/{PAGES}", "status ref")
         buttons.callback("Next", "status nex")
         button = buttons.column(3)
-    msg += f"<b>• Tasks</b>: {tasks}{bmax_task}"
-    msg += f"\n<b>• Bot uptime</b>: {current_time}"
-    msg += f"\n<b>• Free disk space</b>: {get_readable_file_size(disk_usage('/usr/src/app/downloads/').free)}"
+    msg += f"• <u><b>TASKS</b>: {tasks}{bmax_task}</u>"
+    msg += f"\n• <b>BotUP</b>: {current_time} | "
+    msg += f"<b>Free</b>: {get_readable_file_size(disk_usage('/usr/src/app/downloads/').free)}"
+    msg += f"\n• <b>DL</b>: {get_readable_file_size(dl_speed)}/s | "
+    msg += f"<b>UL</b>: {get_readable_file_size(up_speed)}/s"
     return msg, button
 
 
